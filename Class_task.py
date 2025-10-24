@@ -1,11 +1,11 @@
 # ask for user input
-x = int(input("Enter number: "))
+x = int(float(input("Enter a number: ")))
 # check if the number is even or odd
-if x % 2 == 0:
-    print("A")
 if x % 2 == 0 and x % 3 != 0:
     print("B")
-elif x % 2 == 0 and x // 3:
+elif x % 3 == 0 and x % 3 != 0:
     print("C")
-elif x % 2 != 0:
+elif x % 2 == 0:
     print("D")
+else:
+    print("A")
