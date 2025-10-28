@@ -82,10 +82,10 @@ Never gonna make you cry
 Never gonna say goodbye
 Never gonna tell a lie and hurt you"""
 count_never_gonna = song_lyrics.lower().count("never gonna")
-cleaned_lyrics = song_lyrics.replace("[", "").replace("]", "").replace("\n", " ").strip()
-alphabet_count = sum(ch.isalpha() for ch in song_lyrics)
-total_lines = song_lyrics.count("\n") + 1
+cleaned_lyrics = "\n".join(line for line in song_lyrics.splitlines() if not line.strip().startswith('['))
+alphabet_count = sum(ch.isalpha() for ch in cleaned_lyrics)
+total_lines = cleaned_lyrics.count('\n') + 1
 print(f"'Never gonna' appears {count_never_gonna} times in the lyrics.")
-print(f"Cleaned Lyrics: {cleaned_lyrics}")
+print(f"Cleaned Lyrics:\n {cleaned_lyrics}")
 print(f"Total number of alphabetic characters in the lyrics: {alphabet_count}")
 print(f"Total number of lines in the lyrics: {total_lines}")
