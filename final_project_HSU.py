@@ -39,7 +39,7 @@ def main():
         elif choice_selected == "5":
             delete_event()
         elif choice_selected == "6":
-            today = datetime.today().strdtime("%d-%m-%Y")
+            today = datetime.today().strftime("%d-%m-%Y")
             print(f"\nToday's date is: {today}\n")
         elif choice_selected == "7":
             print("Goodbye!")
@@ -99,7 +99,37 @@ def is_valid_date(date_text: str) -> bool:
 
 # menu_banner function to show the menu after executing a option
 def menu_banner() -> None:
-    print(
+    print("-" * 60)
+    print("Calendar Event Tracker".center(60,"-"))
+    print("-" * 60)
+    print("1. Add event")
+    print("2. List all events")
+    print("3. List events on a certain date")
+    print("4. List events in a date range")
+    print("5. Delete an event")
+    print("6. Show today's date")
+    print("7. Exit menu")
+    print("-" * 60)
+
+# print_events function prints a list of events in a tidy table.
+# We don't modify data here; this function is for presention only.
+
+def print_events(view) -> None:
+    if len(view) == 0:
+        print("\n No. events.\n")
+        return
+
+    print("\nIdx | Date | Title | Location")
+    print("-" * 60)
+    for index, (date, title, location, note) in enumerate(view):
+        # Clip long fields so table stays neat.
+        print(f"{index :> 3} | {date} | {title[:23]:< 23} | {location[:18]:< 18}")
+        if note:
+            print(f" Note: {note}")
+        
+        print("")
+
+
 
 
 
