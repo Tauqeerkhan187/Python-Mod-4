@@ -129,7 +129,48 @@ def print_events(view) -> None:
         
         print("")
 
+""" add_event function which collects details from the user and appends to the list.
+    data must pass 'is_valid_date' function 
+    Title must not be empty."""
+def add_event() -> None:
+    print("\n--- Add Event ---")
+    date = input("Date (DD-MM-YYYY): ").strip()
+    if not is_valid_date(date):
+        print("Invalid date. Use DD-MM-YYYY format.\n")
+        return
+    title = input("Title: ").strip()
+    if title == "":
+        print("Title cannot be empty. Please enter title.\n")
+        return
+    # location is optional; we can accept empty strings.
+    location = input("Location (optional): ").strip()
+    note = input("Note (optional): ").strip()
 
+    # Store as a tuple.
+    events.append((date, title, location, note))
+    print("Events added.\n")
+
+""" Shows all events sorted by date (String sort works for 'DD-MM-YYYY').          
+     We make a sorted copy for display so we never change the original list here.     """
+def list_all_events():
+    sorted_display = sorted(events, key= lambda e: e[0])
+    print_events(sorted_display)
+    return sorted_display 
+
+# Filter events by an certain date and display them. 
+def list_events_on_date():
+    date = input("\nShow events on (DD-MM-YYYY): ").strip()
+    if not is_valid_date(date):
+        print("Invalid date. Please enter a valid date.\n")
+        return[]
+
+    display = sorted([e for e in events if e[0] == date], key = lambda e: e[0])
+    print_events(display)
+    return display
+
+
+    
+    
 
 
 
