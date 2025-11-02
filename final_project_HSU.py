@@ -10,23 +10,18 @@
 from datetime import datetime
 
 # Global list which stores events, (date, title, location, note)
-events = [] 
+events = []
+
+LINE = "_" * 60
+MENU_min = 1
+MENU_max = 7
 
 def main():
     while True:
-        print("-" * 60)
-        print("Calendar Event Tracker ".center(60, "-"))
-        print("-" * 60)
-        print("1. Add event")
-        print("2. List all events")
-        print("3. List events on a certain date")
-        print("4. List events in a date range")
-        print("5. Delete an event")
-        print("6. Show today's date")
-        print("7. Exit menu")
-        print("-" * 60)
-
-        choice_selected = input("Choose (1-7): ").strip()
+        menu_banner()
+        choice = read_menu_choice()
+        if choice == 0:
+            continue
 
         if choice_selected == "1":
             add_event()
@@ -44,8 +39,6 @@ def main():
         elif choice_selected == "7":
             print("Goodbye!")
             break
-        else:
-            print("Invalid choice. Please enter a number between 1 and 7.\n")
 
 # Validation for leap year
 
@@ -101,9 +94,9 @@ def is_valid_date(date_text: str) -> bool:
 # menu_banner function to show the menu after executing a option
 
 def menu_banner() -> None:
-    print("-" * 60)
+    print(LINE)
     print("Calendar Event Tracker".center(60,"-"))
-    print("-" * 60)
+    print(LINE)
     print("1. Add event")
     print("2. List all events")
     print("3. List events on a certain date")
@@ -111,7 +104,7 @@ def menu_banner() -> None:
     print("5. Delete an event")
     print("6. Show today's date")
     print("7. Exit menu")
-    print("-" * 60)
+    print(LINE)
 
 # print_events function prints a list of events in a tidy table.
 # We don't modify data here; this function is for presention only.
@@ -234,7 +227,7 @@ def delete_event():
     # Commit the new list back to the global state.
     events.clear()
     events.extend(new_list)
-    print("Event deleted. \n")
+    print("Event deleted.\n")
 
 """ Read a menu choice safely:
     Must be digits only.
@@ -242,16 +235,15 @@ def delete_event():
     Return 0 if invalid (user can loop again). """
 
 def read_menu_choice() -> int:
-    choice = input("Choose (1-6): ").strip()
+    choice = input(f"Choose ({MENU_MIN}-{MENU_MAX}): ").strip()
     if not choice.isdigit():
         print("Invalid choice: not a number. \n")
         return 0
 
     num = int(choice)
-    if num < 1 or num > 6:
+    if num < MENU_MIN or num > MENU_MAX:
         print("Invalid choice: out of range. \n")
         return 0
-
     return num
 
 if __name__ == "__main__":
