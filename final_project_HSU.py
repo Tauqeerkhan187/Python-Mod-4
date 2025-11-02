@@ -66,10 +66,10 @@ def days_in_months(year: int, month: int) -> int
         return 30
 
     return 0 
-# is_valid_date checks if the date format is valid (DD-MM-YYYY)
+# is_valid_date checks if the date format is valid (YYYY-MM-DD)
 
 def is_valid_date(date_text: str) -> bool:
-    #expects exact format DD-MM-YYYY with digits only
+    #expects exact format YYYY-MM-DD with digits only
     if len(date_text) != 10:
         return False
     if date_text[4] != "-" or date_text[7] != "-":
@@ -134,9 +134,9 @@ def print_events(view) -> None:
     Title must not be empty."""
 def add_event() -> None:
     print("\n--- Add Event ---")
-    date = input("Date (DD-MM-YYYY): ").strip()
+    date = input("Date (YYYY-MM-DD): ").strip()
     if not is_valid_date(date):
-        print("Invalid date. Use DD-MM-YYYY format.\n")
+        print("Invalid date. Use YYYY-MM-DD format.\n")
         return
     title = input("Title: ").strip()
     if title == "":
@@ -151,7 +151,7 @@ def add_event() -> None:
     print("Events added.\n")
 
 """ Shows all events sorted by date (String sort works for 'DD-MM-YYYY').          
-     We make a sorted copy for display so we never change the original list here.     """
+     We make a sorted copy for display so we never change the original list here."""
 def list_all_events():
     sorted_display = sorted(events, key= lambda e: e[0])
     print_events(sorted_display)
@@ -159,7 +159,7 @@ def list_all_events():
 
 # Filter events by an certain date and display them. 
 def list_events_on_date():
-    date = input("\nShow events on (DD-MM-YYYY): ").strip()
+    date = input("\nShow events on (YYYY-MM-DD): ").strip()
     if not is_valid_date(date):
         print("Invalid date. Please enter a valid date.\n")
         return[]
@@ -167,6 +167,92 @@ def list_events_on_date():
     display = sorted([e for e in events if e[0] == date], key = lambda e: e[0])
     print_events(display)
     return display
+
+""" list events in range filters events within a given date range. you can't compare dd-mm-yyyy because starts with 1; the only safe string based date comparison is the yyyy-mm-dd format. we do comparisons in this function and validate both dates."""
+
+def list_events_in range():
+    start_date = input("\nStart date (YYYY-MM-DD): ").strip()
+    if not is_valid_date(start_date):
+        print("Invalid start date.\n")
+        return []
+
+    end_date = input("End date (YYYY-MM-DD): ").strip()
+    if not is_valid_date(end_date):
+        print("Invalid end date.\n")
+        return []
+
+    if start > end:
+        print("Start date must be <= end date.\n")
+        return []
+
+    display = sorted([eidx for eidx in events if start <= eidx[0] <= end_date],
+    key = lambda eidx: eidx[0])
+    print_events(display)
+    return display
+
+""" Delete a single event by index from a sorted view.
+    why we show a sorted view first:
+    it gives the user a stable ordering.
+    we remove the matching tuple from the real list,
+    so the correct event is deleted even if there are duplicate events. """
+
+def delete_event():
+    if len(events) == 0:
+        print("\nNo events to delete.\n")
+        return
+
+    # show a sorted view so the user can select index.
+    sorted_display = sorted(events, key = lambda eidx: eidx[0])
+    print_events(sorted_display)
+
+    idx_text = input("Enter the index to delete: ").strip()
+    if not idx_text.isdigit():
+        print("Invalid index (must be a number). \n")
+        return
+
+    idx = int(idx_text)
+    if idx < 0 or idx >= len(sorted_display):
+        print("Index out of range. \n")
+        return
+
+    # Identify the exact tuple to remove from the list.
+    remove_target = sorted_display[idx]
+
+    # Rebuild the list without the remove_target.
+    remove = False
+    new_list = []
+    for eidx in events:
+        if (not removed) and eidx == target:
+            removed = True
+            continue
+        new_list.append(e)
+
+    # Commit the new list back to the global state.
+    events.clear()
+    events.extend(new_list)
+
+    print("Event deleted. \n")
+
+""" Read a menu choice safely:
+    Must be digits only.
+    Must be within allowed (1 to 6)
+    Return 0 if invalid (user can loop again). """
+
+def read_menu_choice() -> int:
+    choice = input("Choose (1-6): ").strip()
+    if not choice.isdigit():
+        print("Invalid choice: not a number. \n")
+        return 0
+
+    num = int(choice)
+    if num < 1 or num > 6:
+        print("Invalid choice: out of range. \n")
+        return 0
+
+    return num
+
+
+
 
 
     
