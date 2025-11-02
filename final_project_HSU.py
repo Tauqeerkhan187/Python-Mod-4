@@ -55,7 +55,7 @@ def is_leap_year(year: int) -> bool:
 
 # Returns the number of days in given month for given year
 
-def days_in_months(year: int, month: int) -> int
+def days_in_months(year: int, month: int) -> int:
 
     if month in (1, 3, 5, 7, 8, 10, 12):
         return 31
@@ -66,6 +66,7 @@ def days_in_months(year: int, month: int) -> int
         return 30
 
     return 0 
+
 # is_valid_date checks if the date format is valid (YYYY-MM-DD)
 
 def is_valid_date(date_text: str) -> bool:
@@ -76,16 +77,16 @@ def is_valid_date(date_text: str) -> bool:
         return False
 
     # - split into components as string 
-    year, month, day = date_text[4], date_text[5:7], date_text[8:]
+    year_str, month_str, day_str = date_text[:4], date_text[5:7], date_text[8:]
 
     # All components must be digits only
-    if not(year.isdigit() and month.isdigit() and day.isdigit()):
+    if not(year_str.isdigit() and month_str.isdigit() and day_str.isdigit()):
         return false
 
     # Convert to integer to check range
-    year = int(year)
-    month = int(month)
-    day = int(day)
+    year = int(year_str)
+    month = int(month_str)
+    day = int(day_str)
 
     if year < 1 or month < 1 or month < 12:
         return False
@@ -98,6 +99,7 @@ def is_valid_date(date_text: str) -> bool:
     return True
 
 # menu_banner function to show the menu after executing a option
+
 def menu_banner() -> None:
     print("-" * 60)
     print("Calendar Event Tracker".center(60,"-"))
@@ -116,7 +118,7 @@ def menu_banner() -> None:
 
 def print_events(view) -> None:
     if len(view) == 0:
-        print("\n No. events.\n")
+        print("\n No. of events.\n")
         return
 
     print("\nIdx | Date | Title | Location")
@@ -132,6 +134,7 @@ def print_events(view) -> None:
 """ add_event function which collects details from the user and appends to the list.
     data must pass 'is_valid_date' function 
     Title must not be empty."""
+
 def add_event() -> None:
     print("\n--- Add Event ---")
     date = input("Date (YYYY-MM-DD): ").strip()
@@ -150,10 +153,11 @@ def add_event() -> None:
     events.append((date, title, location, note))
     print("Events added.\n")
 
-""" Shows all events sorted by date (String sort works for 'DD-MM-YYYY').          
+""" Shows all events sorted by date (String sort works for 'YYYY-MM-DD').          
      We make a sorted copy for display so we never change the original list here."""
+
 def list_all_events():
-    sorted_display = sorted(events, key= lambda e: e[0])
+    sorted_display = sorted(events, key=lambda e: e[0])
     print_events(sorted_display)
     return sorted_display 
 
@@ -164,7 +168,7 @@ def list_events_on_date():
         print("Invalid date. Please enter a valid date.\n")
         return[]
 
-    display = sorted([e for e in events if e[0] == date], key = lambda e: e[0])
+    display = sorted([e for e in events if e[0] == date], key =lambda e: e[0])
     print_events(display)
     return display
 
@@ -181,12 +185,12 @@ def list_events_in range():
         print("Invalid end date.\n")
         return []
 
-    if start > end:
+    if start_date > end_date:
         print("Start date must be <= end date.\n")
         return []
 
-    display = sorted([eidx for eidx in events if start <= eidx[0] <= end_date],
-    key = lambda eidx: eidx[0])
+    display = sorted([e for e in events if start_date <= e[0] <= end_date],
+    key =lambda e: e[0])
     print_events(display)
     return display
 
@@ -198,39 +202,38 @@ def list_events_in range():
 
 def delete_event():
     if len(events) == 0:
-        print("\nNo events to delete.\n")
+        print("\nNo. of events to delete.\n")
         return
 
     # show a sorted view so the user can select index.
-    sorted_display = sorted(events, key = lambda eidx: eidx[0])
+    sorted_display = sorted(events, key = lambda ev: ev[0])
     print_events(sorted_display)
 
     idx_text = input("Enter the index to delete: ").strip()
     if not idx_text.isdigit():
-        print("Invalid index (must be a number). \n")
+        print("Invalid index (must be a number).\n")
         return
 
     idx = int(idx_text)
     if idx < 0 or idx >= len(sorted_display):
-        print("Index out of range. \n")
+        print("Index out of range.\n")
         return
 
     # Identify the exact tuple to remove from the list.
-    remove_target = sorted_display[idx]
+    target = sorted_display[idx]
 
     # Rebuild the list without the remove_target.
-    remove = False
+    removed = False
     new_list = []
-    for eidx in events:
-        if (not removed) and eidx == target:
+    for ev in events:
+        if (not removed) and ev == target:
             removed = True
             continue
-        new_list.append(e)
+        new_list.append(ev)
 
     # Commit the new list back to the global state.
     events.clear()
     events.extend(new_list)
-
     print("Event deleted. \n")
 
 """ Read a menu choice safely:
@@ -251,6 +254,8 @@ def read_menu_choice() -> int:
 
     return num
 
+if __name__ == "__main__":
+    main()
 
 
 
