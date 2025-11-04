@@ -12,9 +12,11 @@ from datetime import datetime
 # Global list which stores events, (date, title, location, note)
 events = []
 
+# Global variable line for presentation, menu min and max for choice menu.
+
 LINE = "_" * 60
-MENU_min = 1
-MENU_max = 7
+MENU_MIN = 1
+MENU_MAX = 7
 
 def main():
     while True:
@@ -23,20 +25,20 @@ def main():
         if choice == 0:
             continue
 
-        if choice_selected == "1":
+        if choice == 1:
             add_event()
-        elif choice_selected == "2":
+        elif choice == 2:
             list_all_events()
-        elif choice_selected == "3":
+        elif choice == 3:
             list_events_on_date()
-        elif choice_selected == "4":
+        elif choice == 4:
             list_events_in_range()
-        elif choice_selected == "5":
+        elif choice == 5:
             delete_event()
-        elif choice_selected == "6":
+        elif choice == 6:
             today = datetime.today().strftime("%d-%m-%Y")
             print(f"\nToday's date is: {today}\n")
-        elif choice_selected == "7":
+        elif choice == 8:
             print("Goodbye!")
             break
 
@@ -55,7 +57,7 @@ def days_in_months(year: int, month: int) -> int:
     # Feb depends on leap year
     if month == 2:
         return 29 if is_leap_year(year) else 28
-    if month in(4,6,9,11):
+    if month in(4, 6, 9, 11):
         return 30
 
     return 0 
@@ -74,19 +76,19 @@ def is_valid_date(date_text: str) -> bool:
 
     # All components must be digits only
     if not(year_str.isdigit() and month_str.isdigit() and day_str.isdigit()):
-        return false
+        return False
 
     # Convert to integer to check range
     year = int(year_str)
     month = int(month_str)
     day = int(day_str)
 
-    if year < 1 or month < 1 or month < 12:
+    if year < 1 or month < 1 or month > 12:
         return False
 
     # Day must be within the max days for that month/year.
-    max_day = days_in_month(year, month)
-    if max_day == 0 or day < 1 or day > max_day:
+    max_day = days_in_months(year, month)
+    if day < 1 or day > max_day:
         return False
 
     return True
@@ -118,7 +120,7 @@ def print_events(view) -> None:
     print("-" * 60)
     for index, (date, title, location, note) in enumerate(view):
         # Clip long fields so table stays neat.
-        print(f"{index :> 3} | {date} | {title[:23]:< 23} | {location[:18]:< 18}")
+        print(f"{index:>3} | {date} | {title[:23]:<23} | {location[:18]:<18}")
         if note:
             print(f" Note: {note}")
         
@@ -150,7 +152,7 @@ def add_event() -> None:
      We make a sorted copy for display so we never change the original list here."""
 
 def list_all_events():
-    sorted_display = sorted(events, key=lambda e: e[0])
+    sorted_display = sorted(events, key=lambda ev: ev[0])
     print_events(sorted_display)
     return sorted_display 
 
@@ -161,13 +163,13 @@ def list_events_on_date():
         print("Invalid date. Please enter a valid date.\n")
         return[]
 
-    display = sorted([e for e in events if e[0] == date], key =lambda e: e[0])
+    display = sorted([ev for ev in events if ev[0] == date], key =lambda ev: ev[0])
     print_events(display)
     return display
 
 """ list events in range filters events within a given date range. you can't compare dd-mm-yyyy because starts with 1; the only safe string based date comparison is the yyyy-mm-dd format. we do comparisons in this function and validate both dates."""
 
-def list_events_in range():
+def list_events_in_range():
     start_date = input("\nStart date (YYYY-MM-DD): ").strip()
     if not is_valid_date(start_date):
         print("Invalid start date.\n")
@@ -248,12 +250,4 @@ def read_menu_choice() -> int:
 
 if __name__ == "__main__":
     main()
-
-
-
-
-    
-    
-
-
 
