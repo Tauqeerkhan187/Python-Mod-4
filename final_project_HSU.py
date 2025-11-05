@@ -38,7 +38,7 @@ def main():
         elif choice == 6:
             today = datetime.today().strftime("%d-%m-%Y")
             print(f"\nToday's date is: {today}\n")
-        elif choice == 8:
+        elif choice == 7:
             print("Goodbye!")
             break
 
