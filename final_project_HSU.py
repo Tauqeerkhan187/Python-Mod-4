@@ -36,7 +36,7 @@ def main():
         elif choice == 5:
             delete_event()
         elif choice == 6:
-            today = datetime.today().strftime("%d-%m-%Y")
+            today = datetime.today().strftime("%Y-%m-%d")
             print(f"\nToday's date is: {today}\n")
         elif choice == 7:
             print("Goodbye!")
