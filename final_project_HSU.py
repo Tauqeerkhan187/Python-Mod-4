@@ -197,7 +197,7 @@ def list_events_in_range():
 
 def delete_event():
     if len(events) == 0:
-        print("\nNo. of events to delete.\n")
+        print("\nNo events to delete.\n")
         return
 
     # show a sorted view so the user can select index.
