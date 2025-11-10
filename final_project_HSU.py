@@ -13,10 +13,6 @@ from datetime import datetime
 events = []
 
 # Global variable line for presentation, menu min and max for choice menu.
-<<<<<<< HEAD
-=======
-
->>>>>>> e9ff06a392fa4f88329ef3fe099b10ecf2e6680c
 LINE = "_" * 60
 MENU_MIN = 1
 MENU_MAX = 7
