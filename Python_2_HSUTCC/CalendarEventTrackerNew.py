@@ -1,0 +1,295 @@
+# Author: Tauqeer Khan
+# Date: 17-11-2025
+# Purpose: This program is a menu-driven Calendar Event Tracker
+# lets the user add, view, filter, delete, and view calendar events by date.
+# Search events by keyword in the title or note.
+# View events in a simple text-based weekly view; and export all events to a
+# CSV file for use in Excel or Google sheets. Events are presented as obj, saved via a 
+# plugged storage backend (using abstract classes)
+# uses decorator (wrappers) to auto-save changes to disk.
+
+from datetime import datetime, timedelta
+from abc import ABC, abstractmethod
+import functools
+import json
+import csv
+from typing import List, Iterable
+
+LINE = "_" * 60
+MENU_MIN = 1
+MENU_MAX = 11
+
+# Decorators method
+def autosave(method):
+    """Decorator for methods that modify the events list.
+        After the wrapped method runs, the current calendar is saved
+        via self._save()."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        result = method(self, *args, **kwargs)
+        # Only saves if the method didn't signal false
+        if result is not False:
+            self.save()
+        return result
+    return wrapper
+
+# Data model
+class Event:
+    """Represents a single calendar event."""
+    def __init__(self, date:str, title: str, location: str = "", note: str = ""):
+        self.date = date # YYYY-MM-DD 
+        self.title = title
+        self.location = location
+        self.note = note
+        
+    def to_dict(self) -> dict:
+        """Convert event to a dict so it can be saved as JSON."""
+        return{
+            "Date": self.date,
+            "Title": self.title,
+            "Location": self.location,
+            "Note": self.note }
+    
+    @staticmethod
+    def from_dict(data: dict) -> "Event":
+        """Create an Event object from a dict (loaded from JSON)."""
+        return Event(
+            """Create an Event object from a dict (loaded from JSON)."""
+            return Event(
+                date=data.get("date", "")
+                title=data.get("title", "")
+                location=data.get("location", "")
+                note=data.get("note", "")
+            )
+        )
+
+# Abstract Storage
+class Event_Storage(ABC):
+    """Abstract base class for event storage backends."""
+    
+    @abstractmethod
+    def load(self) -> List[Event]:
+        """Load events from storage and return a list of Event objects."""
+        pass
+    
+    @abstractmethod
+    def save(self, events: Iterable[Event]) -> None:
+        """Save the given events to storage."""
+        pass
+    
+# Json file storage
+class JSON_File_Storage(Event_Storage):
+    """Storage implementation that saves events to a JSON file."""
+    
+    def __init__(self, filename: str = "events.json"):
+        self.filename = filename
+    
+    def load(self) -> List[Event]:
+        try:
+            with open(self.filename, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return [Event.from_dict(ev) for ev in data]
+        except FileNotFoundError:
+            return []
+        except json.JSONDecodeError:
+            print("Warning: events file is corrupted. Starting with empty list.")
+            return []
+        
+    def save(self, events: Iterable[Event]) -> None:
+        data = [ev.to_dict() for ev in events]
+        with open(self.filename, "w", encoding = "utf-8") as f:
+            json.dump(data, f, indent=4)
+    
+# Main App class
+
+class CalendarEventTracker:
+    """Main application class for managing events."""
+    
+    def __init__(self, storage: Event_Storage):
+        self._storage = storage
+        self.events: List[Event] = self._storage.load()
+    
+    # internal method helper used by decorator
+    def _Save(self) -> None:
+        self._storage.save(self.events)
+    
+    # Date Validation
+    
+    @staticmethod
+    def is_leap_year(year: int) -> bool:
+        return (year % 400 = 0) or (year % 4 == 0 and year % 100 != 0)
+    
+    @classmethod
+    def days_in_month(cls, year: int, month: int) -> int:
+        if month in (1, 3, 5, 7, 8, 10, 12):
+            return 31
+        if month == 2:
+            return 29 if cls.is_leap_year(year) else 28
+        if month in (4, 6, 9, 11):
+            return 30
+        return 0
+    
+    @classmethod
+    def is_valid_date(cls, date_text: str) -> bool:
+        """Validate date in YYYY-MM-DD format."""
+        if len(date_text) != 10:
+            return False
+        if date_text[4] != "-" or date_text[7] != "-":
+            return False
+        
+        year_str, month_str, day_str = date_text[:4], date_text[5:7], date_text[8:]
+
+        if not (year_str.isdigit() and month_str.isdigit() and day_str.isidigit()):
+            return False
+        
+        year = int(year_str)
+        month = int(month_str)
+        day = int(day_str)
+        
+        if year < 1 or month < 1 or month > 12:
+            return False
+        
+        max_day = cls.days_in_month(year, month)
+        if day < 1 or day > max_day:
+            return False
+        
+        return True
+    
+    # UI and Menu
+    def run(self) -> None:
+        """Main loop"""
+        while True:
+            self.menu_banner()
+            choice = self.read_menu_choice()
+            if choice == 0:
+                continue
+            
+            if choice == 1:
+                self.add_event()
+            elif choice == 2:
+                self.list_all_events()
+            elif choice == 3:
+                self.list_events_on_date()
+            elif choice == 4:
+                self.list_events_in_range()
+            elif choice == 5:
+                self.delete_event()
+            elif choice == 6:
+                today = datetime.today().strftime("%Y-%m-%d")
+                print(f"\nToday's date is: {today}\n")
+            elif choice == 7:
+                self.edit_event()
+            elif choice == 8:
+                self.search_event()
+            elif choice == 9:
+                self.export_to_csv()
+            elif choice == 10:
+                self.weekly_view()
+            elif choice == 11:
+                print("Goodbye!")
+                break
+    @staticmethod
+    def menu_banner() -> None:
+        print(LINE)
+        print("Calendar Event Tracker".center(60, "-"))
+        print(LINE)
+        print("1. Add event")
+        print("2. List all events")
+        print("3. List events on a certain date")
+        print("4. List events in a date range")
+        print("5. Delete an event")
+        print("6. Show today's date")
+        print("7. Edit an event (title/location/note)")
+        print("8. Search events by keyword")
+        print("9. Export all events to CSV")
+        print("10. Weekly view (7- day range)")
+        print(LINE)
+    
+    @staticmethod
+    def read_menu_choice() -> int:
+        choice = input(f"Choose ({MENU_MIN}-{MENU_MAX}): ").strip()
+        if not choice.isdigit():
+            print("Invalid choice: not a number.\n")
+            return 0
+        
+        num = int(choice)
+        if num < MENU_MIN or num > MENU_MAX:
+            print("Invalid choice: out of range.\n")
+            return 0
+        return num
+    
+    # Presentation to make the program look good.
+    
+    @staticmethod
+    def print_events(view: List[Event]) -> None:
+        if len(view) == 0:
+            print("\nNo events.\n")
+            return
+        
+        print("\nIdx | Date   | Title     | Location")
+        print("-" * 60)
+        for index, ev in enumerate(view):
+            date = ev.date
+            title = ev.title[:23]
+            location = ev.location[:18]
+            print(f"{index:>3} | {date} | {title:<23} | {location:<18}")
+            if ev.note:
+                print(f"     Note: {ev.note}")
+            print("")
+    
+    #autosave
+    def add_event(self) -> None:
+        print("\n --- Add Event ---")
+        date = input("Date (YYYY-MM-DD): ").strip()
+        if not self.is_valid_date(date):
+            print("Invalid date. Use YYYY-MM-DD format.\n")
+            return False
+        
+        title = input("Title: ").strip()
+        if title == "":
+            print("Title cannot be empty.\n")
+            return False
+        
+        location = input("Location (opt): ").strip()
+        note = input("Note (opt): ").strip()
+        
+        self.events.append(Event(date, title, location, note))
+        print("Event added.\n")
+        
+    def list_all_events(self) -> List[Event]:
+        sorted_display = sorted(self.events, key=lambda ev: ev.date)
+        self.print_events(sorted_display)
+        return sorted_display
+    
+    def list_events_on_date(self) -> List[Event]:
+        date = input("\nShow events on (YYYY-MM-DD): ").strip()
+        if not self.is_valid_date(date):
+            print("Invalid date. Please enter a valid date.\n")
+            return []
+        
+        display = sorted(
+            [ev for ev in self.events if ev.date == date],
+            key=lambda ev: ev.date,
+        )
+        self.print_events(display)
+        return display
+    
+    def list_Events_in_range(self) -> List[Event]:
+        start_date = input("\nStart date (YYYY-MM-DD): ").strip()
+        if not self.is_valid_date(start_date):
+            print("Invalid start date.\n")
+            return []
+        
+        end_date = input("End date (YYYY-MM-DD): ").strip()
+        if not self.is_valid_date(end_date):
+            print("Invalid end date.\n")
+            return []
+        
+        if start_date > end_date:
+            print("Start date must be <= end date.\n")
+            return []
+        
+        display = sorted(
+            [ev for ev in self.events if start_date <= ev.date <= end_date],
+            key=lambda ev: ev.date,
+        )
