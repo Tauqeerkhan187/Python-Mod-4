@@ -79,9 +79,11 @@ class JSON_File_Storage(Event_Storage):
     """Storage implementation that saves events to a JSON file."""
     
     def __init__(self, filename: str = "events.json"):
+        # File path where events will be loaded from / saved to
         self.filename = filename
     
     def load(self) -> List[Event]:
+        """Load events from a JSON file and return them as Event obj"""
         try:
             with open(self.filename, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -93,16 +95,17 @@ class JSON_File_Storage(Event_Storage):
             return []
         
     def save(self, events: Iterable[Event]) -> None:
+        """Serialize Event objects to JSON and write them to file."""
         data = [ev.to_dict() for ev in events]
         with open(self.filename, "w", encoding = "utf-8") as f:
             json.dump(data, f, indent=4)
     
 # Main App class
-
 class CalendarEventTracker:
     """Main application class for managing events."""
     
     def __init__(self, storage: Event_Storage):
+        # Insert storage backend (inject dependency)
         self._storage = storage
         self.events: List[Event] = self._storage.load()
     
@@ -119,6 +122,7 @@ class CalendarEventTracker:
     
     @classmethod
     def days_in_month(cls, year: int, month: int) -> int:
+        """Return the number of days in a given month of a given year."""
         if month in (1, 3, 5, 7, 8, 10, 12):
             return 31
         if month == 2:
@@ -136,7 +140,9 @@ class CalendarEventTracker:
             return False
         
         year_str, month_str, day_str = date_text[:4], date_text[5:7], date_text[8:]
-
+        
+        # All three must be numeric
+        
         if not (year_str.isdigit() and month_str.isdigit() and day_str.isdigit()):
             return False
         
@@ -144,9 +150,11 @@ class CalendarEventTracker:
         month = int(month_str)
         day = int(day_str)
         
+        # Basic checks
         if year < 1 or month < 1 or month > 12:
             return False
         
+        # Check day against max days in that month or year.
         max_day = cls.days_in_month(year, month)
         if day < 1 or day > max_day:
             return False
@@ -188,6 +196,7 @@ class CalendarEventTracker:
                 break
     @staticmethod
     def menu_banner() -> None:
+        """Print the main menu."""
         print(LINE)
         print("Calendar Event Tracker".center(60, "-"))
         print(LINE)
