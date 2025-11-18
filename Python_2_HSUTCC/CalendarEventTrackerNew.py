@@ -293,3 +293,86 @@ class CalendarEventTracker:
             [ev for ev in self.events if start_date <= ev.date <= end_date],
             key=lambda ev: ev.date,
         )
+        self.print_events(display)
+        return display
+    
+    @autosave
+    def delete_event(self) -> None:
+        if len(self.events) == 0:
+            print("\nNo events available to delete.\n")
+            return False
+        
+        sorted_display = sorted(self.events, key=lambda ev: ev.date)
+        self.print_events(sorted_display)
+        
+        idx_text = input("Enter the index to delete: ").strip()
+        if not idx_text.isdigit():
+            print("Invalid index (must be a number).\n")
+            return False
+        
+        idx = int(idx_text)
+        if idx < 0 or idx >= len(sorted_display):
+            print("Index out of range.\n")
+            return False
+        
+        target = sorted_display[idx]
+        
+        print("\nLeave a blank field to keep the current value.")
+        new_title = input(f"New title [{target.title}]: ").strip()
+        new_location = input(f"New Location [{target.location}]: ").strip()
+        new_note = input(f"New Note [{target.note}]: ").strip()
+        
+        if new_title != "":
+            target.title = new_title
+        if new_location != "":
+            target.location = new_location
+        if new_note != "":
+            target.note = new_note
+            
+        print("Event Calendar Updated.\n")
+        
+    def search_events(self) -> List[Event]:
+        """Search events by keyword in title or note"""
+        keyword = input("\nEnter keyword to search in title/note: ").strip()
+        if keyword == "":
+            print("Keyword cannot be empty.\n")
+            return []
+        
+        needle = keyword.lower()
+        matches = [
+            ev for ev in self.events
+            if needle in ev.title.lower() or needle in ev.note.lower()
+        ]
+        
+        matches_sorted = sorted(matches, key=lambda ev: ev.date)
+        self.print_events(matches_sorted)
+        return matches_sorted
+    
+    def export_to_csv(self, csv_filename: str = "events_export.csv") -> None:
+        """Exports all events to a csv file"""
+        if len(self.events) == 0:
+            print("\nNo events in calendar to export.\n")
+            return
+        
+        with open(csv_filename, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Date", "Title", "Location", "note"])
+            for ev in sorted(self.events, key=lambda e: e.date):
+                writer.writerow([ev.date, ev.title, ev.location, ev.note])
+        
+        print(f"\nEvents exported to '{csv_filename}'.\n")
+        
+    def weekly_view(self) -> None:
+        """Show a weekly view.
+           User provides a week start date (YYYY-MM-DD).
+           Display events for that day and the next 6 days."""
+        start_date_str = input("\nEnter week start date (YYYY-MM-DD): ").strip()
+        
+        if not self.is_valid_date(start_date_str):
+            print("Invalid date.\n")
+            return
+        
+        # Build mapping date -> list of events on that day
+        date_to_events = {} 
+        for ev in self.events:
+                        
