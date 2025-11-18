@@ -54,14 +54,11 @@ class Event:
     def from_dict(data: dict) -> "Event":
         """Create an Event object from a dict (loaded from JSON)."""
         return Event(
-            """Create an Event object from a dict (loaded from JSON)."""
-            return Event(
-                date=data.get("date", "")
-                title=data.get("title", "")
-                location=data.get("location", "")
-                note=data.get("note", "")
+                date = data.get("date", ""),
+                title = data.get("title", ""),
+                location = data.get("location", ""),
+                note = data.get("note", ""),
             )
-        )
 
 # Abstract Storage
 class Event_Storage(ABC):
@@ -117,7 +114,8 @@ class CalendarEventTracker:
     
     @staticmethod
     def is_leap_year(year: int) -> bool:
-        return (year % 400 = 0) or (year % 4 == 0 and year % 100 != 0)
+        """Return True if a given year is a leap year."""
+        return (year % 400 == 0) or (year % 4 == 0 and year % 100 != 0)
     
     @classmethod
     def days_in_month(cls, year: int, month: int) -> int:
@@ -139,7 +137,7 @@ class CalendarEventTracker:
         
         year_str, month_str, day_str = date_text[:4], date_text[5:7], date_text[8:]
 
-        if not (year_str.isdigit() and month_str.isdigit() and day_str.isidigit()):
+        if not (year_str.isdigit() and month_str.isdigit() and day_str.isdigit()):
             return False
         
         year = int(year_str)
@@ -371,8 +369,45 @@ class CalendarEventTracker:
         if not self.is_valid_date(start_date_str):
             print("Invalid date.\n")
             return
+
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            print("Invalid date format.\n")
+            return
+        
+        end_date = start_date + timedelta(days=6)
+        print(f"\nWeekly view from {start_date} to {end_date}:\n")
         
         # Build mapping date -> list of events on that day
-        date_to_events = {} 
+        date_to_events = {}
         for ev in self.events:
-                        
+            try:
+                ev_date = datetime.strptime(ev.date, "%Y-%m-%d").date()
+            except ValueError:
+                # Skip wrong dates
+                continue
+            if start_date <= ev_date <= end_date:
+                date_to_events.setdefault(ev_date, []).append(ev)
+        # Iterate each day in the week and print events
+        for i in range(7):
+            current_day = start_date + timedelta(days = i)
+            day_name = current_day.strftime("%A")
+            print(LINE)
+            print(f"{current_day} ({day_name})")
+            print(LINE)
+            
+            day_events = date_to_events.get(current_day, [])
+            if not day_events:
+                print("No events available.")
+            else:
+                for ev in sorted(day_events, key = lambda x: x.title.lower()):
+                    print(f" - {ev.title} @ {ev.location or 'N/A'} ")
+                    if ev.note:
+                        print(f"    Note: {ev.note}")
+            print("")
+
+if __name__ == "__main__":
+    storage = JSON_File_Storage("events.json")
+    app = CalendarEventTracker(storage)
+    app.run()
