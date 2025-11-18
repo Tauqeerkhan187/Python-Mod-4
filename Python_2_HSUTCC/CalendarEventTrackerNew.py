@@ -210,6 +210,7 @@ class CalendarEventTracker:
         print("8. Search events by keyword")
         print("9. Export all events to CSV")
         print("10. Weekly view (7- day range)")
+        print("11. Goodbye!")
         print(LINE)
     
     @staticmethod
@@ -379,7 +380,7 @@ class CalendarEventTracker:
         if new_note != "":
             target.note = new_note
             
-        print("Event update.\n")
+        print("Event updated.\n")
                 
     def search_events(self) -> List[Event]:
         """Search events by keyword in title or note"""
