@@ -296,6 +296,7 @@ class CalendarEventTracker:
     
     @autosave
     def delete_event(self) -> None:
+        """Delete a single event selected by index from a sorted view."""
         if len(self.events) == 0:
             print("\nNo events available to delete.\n")
             return False
@@ -315,10 +316,45 @@ class CalendarEventTracker:
         
         target = sorted_display[idx]
         
-        print("\nLeave a blank field to keep the current value.")
-        new_title = input(f"New title [{target.title}]: ").strip()
-        new_location = input(f"New Location [{target.location}]: ").strip()
-        new_note = input(f"New Note [{target.note}]: ").strip()
+        # Rebuild event list without the chosen target (first match)
+        removed = False
+        new_list: List[Event] = []
+        for ev in self.events:
+            if (not removed) and ev is target:
+                removed = True
+                continue
+            new_list.append(ev)
+            
+        self.events = new_list
+        print("Event delete.\n")
+    
+    # Extra features
+    
+    @ autosave
+    def edit_event(self) -> None:
+        """Edit an existing event's title, location, or note."""
+        if len(self.events) == 0:
+            print("\nNo events to edit.\n")
+            return False
+        
+        sorted_display = sorted(self.events, key=lambda ev: ev.date)
+        self.print_events(sorted_display)
+        
+        idx_text = input("Enter the index of the event to edit: ").strip()
+        if not idx_text.isdigit():
+            return False
+        
+        idx = int(idx_text)
+        if idx < 0 or idx >= len(sorted_display):
+            print("Index out of range.\n")
+            return False
+        
+        target = sorted_display[idx]
+        
+        print("\nLeave a field blank to keep the current value.")
+        new_title = input(f"New Title [{target.title}]: ").strip()
+        new_location = input(f"New location [{target.location}]: ").strip()
+        new_note = input(f"New note [{target.note}]: ").strip()
         
         if new_title != "":
             target.title = new_title
@@ -327,8 +363,8 @@ class CalendarEventTracker:
         if new_note != "":
             target.note = new_note
             
-        print("Event Calendar Updated.\n")
-        
+        print("Event update.\n")
+                
     def search_events(self) -> List[Event]:
         """Search events by keyword in title or note"""
         keyword = input("\nEnter keyword to search in title/note: ").strip()
