@@ -110,7 +110,7 @@ class CalendarEventTracker:
         self.events: List[Event] = self._storage.load()
     
     # internal method helper used by decorator
-    def Save(self) -> None:
+    def save(self) -> None:
         self._storage.save(self.events)
     
     # Date Validation
@@ -234,7 +234,7 @@ class CalendarEventTracker:
             return
         
         print("\nIdx | Date       | Title                   | Location           | Note")
-        print("-" * 100)
+        print("-" * 60)
         
         for index, ev in enumerate(view):
             date = ev.date or ""
@@ -252,7 +252,8 @@ class CalendarEventTracker:
     
     @autosave
     def add_event(self) -> None:
-        print("\n --- Add Event ---")
+        print("\n --- Add Event ---\n")
+        
         date = input("Date (YYYY-MM-DD): ").strip()
         if not self.is_valid_date(date):
             print("Invalid date. Use YYYY-MM-DD format.\n")
@@ -341,7 +342,7 @@ class CalendarEventTracker:
             new_list.append(ev)
             
         self.events = new_list
-        print("Event delete.\n")
+        print("Event deleted.\n")
     
     # Extra features
     
