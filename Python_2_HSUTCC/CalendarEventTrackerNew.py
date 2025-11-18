@@ -45,10 +45,10 @@ class Event:
     def to_dict(self) -> dict:
         """Convert event to a dict so it can be saved as JSON."""
         return{
-            "Date": self.date,
-            "Title": self.title,
-            "Location": self.location,
-            "Note": self.note }
+            "date": self.date,
+            "title": self.title,
+            "location": self.location,
+            "note": self.note }
     
     @staticmethod
     def from_dict(data: dict) -> "Event":
@@ -110,7 +110,7 @@ class CalendarEventTracker:
         self.events: List[Event] = self._storage.load()
     
     # internal method helper used by decorator
-    def _Save(self) -> None:
+    def Save(self) -> None:
         self._storage.save(self.events)
     
     # Date Validation
@@ -186,7 +186,7 @@ class CalendarEventTracker:
             elif choice == 7:
                 self.edit_event()
             elif choice == 8:
-                self.search_event()
+                self.search_events()
             elif choice == 9:
                 self.export_to_csv()
             elif choice == 10:
@@ -250,7 +250,7 @@ class CalendarEventTracker:
                 f"{note:<40}"
             )
     
-    #autosave
+    @autosave
     def add_event(self) -> None:
         print("\n --- Add Event ---")
         date = input("Date (YYYY-MM-DD): ").strip()
@@ -287,7 +287,7 @@ class CalendarEventTracker:
         self.print_events(display)
         return display
     
-    def list_Events_in_range(self) -> List[Event]:
+    def list_events_in_range(self) -> List[Event]:
         start_date = input("\nStart date (YYYY-MM-DD): ").strip()
         if not self.is_valid_date(start_date):
             print("Invalid start date.\n")
