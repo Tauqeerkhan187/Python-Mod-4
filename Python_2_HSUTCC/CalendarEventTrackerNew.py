@@ -234,14 +234,21 @@ class CalendarEventTracker:
             return
         
         print("\nIdx | Date       | Title                   | Location           | Note")
-        print("-" * 90)
+        print("-" * 100)
         
         for index, ev in enumerate(view):
-            print(f"{index:>3} | "
-                  f"{ev.date} | "
-                  f"{ev.title[:23]:<23} | "
-                  f"{ev.location[:15]:<15} |"
-                  f"{ev.note[:25]:<25}")
+            date = ev.date or ""
+            title = (ev.title or "")[:23]
+            location = (ev.location or "")[:18]
+            note = (ev.note or "")[:40]
+
+            print(
+                f"{index:>3} | "
+                f"{date} | "
+                f"{title:<23} | "
+                f"{location:<18} | "
+                f"{note:<40}"
+            )
     
     #autosave
     def add_event(self) -> None:
