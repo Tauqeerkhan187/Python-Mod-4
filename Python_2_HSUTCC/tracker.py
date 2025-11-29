@@ -1,118 +1,28 @@
-# Author: Tauqeer Khan
-# Date: 17-11-2025
-# Purpose: This program is a menu-driven Calendar Event Tracker
-# lets the user add, view, filter, delete, and view calendar events by date.
-# Search events by keyword in the title or note.
-# View events in a simple text-based weekly view; and export all events to a
-# CSV file for use in Excel or Google sheets. Events are presented as obj, saved via a 
-# plugged storage backend (using abstract classes)
-# uses decorator (wrappers) to auto-save changes to disk.
-
+# tracker.py
+# contains validation, menu, add/list/edit/delete, and weekly_view functions.
 from datetime import datetime, timedelta
-from abc import ABC, abstractmethod
-import functools
-import json
+from typing import List
 import csv
-from typing import List, Iterable
+
+from model import Event
+from storage import Event_Storage
+from decorators import autosave
 
 LINE = "_" * 60
 MENU_MIN = 1
 MENU_MAX = 11
 
-# Decorators method
-def autosave(method):
-    """Decorator for methods that modify the events list.
-        After the wrapped method runs, the current calendar is saved
-        via self._save()."""
-    @functools.wraps(method)
-    def wrapper(self, *args, **kwargs):
-        result = method(self, *args, **kwargs)
-        # Only saves if the method didn't signal false
-        if result is not False:
-            self.save()
-        return result
-    return wrapper
-
-# Data model
-class Event:
-    """Represents a single calendar event."""
-    def __init__(self, date:str, title: str, location: str = "", note: str = ""):
-        self.date = date # YYYY-MM-DD 
-        self.title = title
-        self.location = location
-        self.note = note
-        
-    def to_dict(self) -> dict:
-        """Convert event to a dict so it can be saved as JSON."""
-        return{
-            "date": self.date,
-            "title": self.title,
-            "location": self.location,
-            "note": self.note }
-    
-    @staticmethod
-    def from_dict(data: dict) -> "Event":
-        """Create an Event object from a dict (loaded from JSON)."""
-        return Event(
-                date = data.get("date", ""),
-                title = data.get("title", ""),
-                location = data.get("location", ""),
-                note = data.get("note", ""),
-            )
-
-# Abstract Storage
-class Event_Storage(ABC):
-    """Abstract base class for event storage backends."""
-    
-    @abstractmethod
-    def load(self) -> List[Event]:
-        """Load events from storage and return a list of Event objects."""
-        pass
-    
-    @abstractmethod
-    def save(self, events: Iterable[Event]) -> None:
-        """Save the given events to storage."""
-        pass
-    
-# Json file storage
-class JSON_File_Storage(Event_Storage):
-    """Storage implementation that saves events to a JSON file."""
-    
-    def __init__(self, filename: str = "events.json"):
-        # File path where events will be loaded from / saved to
-        self.filename = filename
-    
-    def load(self) -> List[Event]:
-        """Load events from a JSON file and return them as Event obj"""
-        try:
-            with open(self.filename, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return [Event.from_dict(ev) for ev in data]
-        except FileNotFoundError:
-            return []
-        except json.JSONDecodeError:
-            print("Warning: events file is corrupted. Starting with empty list.")
-            return []
-        
-    def save(self, events: Iterable[Event]) -> None:
-        """Serialize Event objects to JSON and write them to file."""
-        data = [ev.to_dict() for ev in events]
-        with open(self.filename, "w", encoding = "utf-8") as f:
-            json.dump(data, f, indent=4)
-    
-# Main App class
 class CalendarEventTracker:
     """Main application class for managing events."""
-    
+
     def __init__(self, storage: Event_Storage):
-        # Insert storage backend (inject dependency)
         self._storage = storage
         self.events: List[Event] = self._storage.load()
-    
-    # internal method helper used by decorator
+
+    # internal helper used by decorator
     def save(self) -> None:
         self._storage.save(self.events)
-    
+
     # Date Validation
     
     @staticmethod
@@ -459,8 +369,3 @@ class CalendarEventTracker:
                     if ev.note:
                         print(f"    Note: {ev.note}")
             print("")
-
-if __name__ == "__main__":
-    storage = JSON_File_Storage("events.json")
-    app = CalendarEventTracker(storage)
-    app.run()

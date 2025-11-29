@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from contextlib import redirect_stdout
 
-from CalendarEventTrackerNew import (
+from Python_2_HSUTCC.main_ev_tracker import (
     Event,
     JSON_File_Storage,
     Event_Storage,
